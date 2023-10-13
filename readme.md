@@ -52,9 +52,9 @@
 2. Программный код, реализующий пайплайны.
 3. Открыт Pull Request в данный репозиторий.
 
-## Пример
+## Шаблоны решений
 
-Примеры далее отображают возможную конфигурацию пайплайнов с использованием `DockerOperator`
+Шаблоны далее отображают **возможную** конфигурацию пайплайнов с использованием `DockerOperator`
 
 ### Пайплайн для инференса
 
@@ -82,6 +82,7 @@ wait_for_new_file = FileSensor(
     task_id='wait_for_new_file',
     poke_interval=10,  # Interval to check for new files (in seconds)
     filepath='/path/to/input_video',  # Target folder to monitor
+    fs_conn_id='<file-connection-id>', # Check FAQ for info
     dag=dag,
 )
 
@@ -89,7 +90,8 @@ extract_audio = DockerOperator(
     task_id='extract_audio',
     image='ffmpeg_image',
     command='ffmpeg -i input_video.mp4 -vn audio.wav',
-    volumes=['/path/to/input_video:/input_video', '/path/to/output_folder:/output'],
+    mounts=[Mount(source='/data', target='/data', type='bind')],
+    docker_url="tcp://docker-proxy:2375",
     dag=dag,
 )
 
@@ -97,7 +99,8 @@ transform_audio_to_text = DockerOperator(
     task_id='transform_audio_to_text',
     image='ml_model_image',
     command='python audio_to_text.py --input audio.wav --output text.txt',
-    volumes=['/path/to/audio:/audio', '/path/to/text:/text'],
+    mounts=[Mount(source='/data', target='/data', type='bind')],
+    docker_url="tcp://docker-proxy:2375",
     dag=dag,
 )
 
@@ -105,7 +108,8 @@ summarize_text = DockerOperator(
     task_id='summarize_text',
     image='ml_model_image',
     command='python summarize_text.py --input text.txt --output summary.txt',
-    volumes=['/path/to/text:/text', '/path/to/summary:/summary'],
+    mounts=[Mount(source='/data', target='/data', type='bind')],
+    docker_url="tcp://docker-proxy:2375",
     dag=dag,
 )
 
@@ -113,7 +117,8 @@ save_to_pdf = DockerOperator(
     task_id='save_to_pdf',
     image='ml_model_image',
     command='python save_to_pdf.py --input summary.txt --output result.pdf',
-    volumes=['/path/to/summary:/summary', '/path/to/output_folder:/output'],
+    mounts=[Mount(source='/data', target='/data', type='bind')],
+    docker_url="tcp://docker-proxy:2375",
     dag=dag,
 )
 
@@ -144,7 +149,8 @@ read_data = DockerOperator(
     task_id='read_data',
     image='read_data_image',
     command='python read_data.py --input /data --output /prepared_data',
-    volumes=['/path/to/input_folder:/data', '/path/to/output_folder:/prepared_data'],
+    mounts=[Mount(source='/data', target='/data', type='bind')],
+    docker_url="tcp://docker-proxy:2375",
     dag=dag,
 )
 
@@ -152,7 +158,8 @@ train_model = DockerOperator(
     task_id='train_model',
     image='train_model_image',
     command='python train_model.py --input /prepared_data --output /trained_model',
-    volumes=['/path/to/prepared_data:/prepared_data', '/path/to/output_folder:/trained_model'],
+    mounts=[Mount(source='/data', target='/data', type='bind')],
+    docker_url="tcp://docker-proxy:2375",
     dag=dag,
 )
 
@@ -195,6 +202,36 @@ read_data >> train_model
 
         output = query("sample1.flac")
         ```
-    2. Использовать библиотеку [`transformers`](https://github.com/huggingface/transformers) и собрать собственный образ
-    3. Найти готовый образ например <https://hub.docker.com/r/onerahmet/openai-whisper-asr-webservice>
+    2. **(Наиболее предпочтительный способ)** 
+    Использовать библиотеку [`transformers`](https://github.com/huggingface/transformers) и собрать собственный образ
+    3. Найти готовый образ, например <https://hub.docker.com/r/onerahmet/openai-whisper-asr-webservice>
 
+- Для реализации `FileSensor` оператора необходимо создать `Connection` средствами веб-интерфейса Airflow. За подробной инструкцией
+можно обратиться к докумментации: <https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#creating-a-connection-with-the-ui>
+
+- В силу использования `dind` (docker-in-docker) для реализации пайплайна с использованием `DockerOperator` 
+возникает ряд особенностей связанных с контейнеризацией. Рассмотрим далее лишь особенность связанную с работой с файлами и опустим
+проблемы возникающие с организацией `dind` в целом. 
+
+(если вопрос организации `dind` инфраструктуры вам интересен, то можете обратиться по следующим ссылкам: [[1]](https://shisho.dev/blog/posts/docker-in-docker/), [[2]](https://github.com/ssau-data-engineering/Lab-2/issues/1))
+
+Итак, в рамках лабораторных работ предлагается использовать инфраструктуру заданную конфигурационными файлами `docker-compose` 
+в репозитории **Prerequisites**. В конфигурации относящейся непосредственно к сервисам Apache Airflow можно заметить контейнер
+**docker-proxy**, который и позволит нам пользоваться `DockerOperator` в наиболее безопасной манере. 
+```yaml
+  docker-proxy:
+    image: docker:24-dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    volumes:
+      - ./airflow/data:/data
+```
+Обратите внимание на то,
+какая директория проброшена для данного контейнера: `./airflow/data:/data`. 
+Это означает что **docker-proxy**, который ответственнен
+за процесс менеджмента контейнеров `DockerOperator`, имеет доступ к данным 
+находящимся внутри `./airflow/data`, что в свою очередь для нас означает возможность использования файлов из
+директории `/Prerequisits/airflow/data` внутри **docker-proxy** по пути `/data`. Если обратиться к шаблону возможной реализации
+пайплайна - вы можете наблюдать, что для контейнеров `DockerOperator` происходит отображение директории `/data:/data`,
+соответственно конейнеры для получения доступа к данным должны использовать именно директорию `/data`.
