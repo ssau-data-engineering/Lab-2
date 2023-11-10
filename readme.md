@@ -30,7 +30,7 @@
 Все директории маунтятся к диску (scripts тоже, что было удобно при разработке, но не совсем правильно для прода). При запуске контейнера запускается скрипт ``main.py``. В файле ```train.py``` содержатся функции для обучения моделей. Модель цикл обучения модели запускается для каждого файла в папке ```data```.
 
 <p align="center">
-  <img width="800" height="300" src="https://github.com/Anteii/Lab-2/tree/main/screenshots/train-log.png"/>
+  <img width="800" height="300" src="https://github.com/Anteii/Lab-2/blob/main/screenshots/train-log.png"/>
 </p>
 
 Для того, чтобы построить лог использовал небольшую выборку данных, поскольку обучение проходило на CPU, поэтому такие неплохие результаты.
@@ -48,7 +48,7 @@
 Для FileSensor в веб интерфейсе Airflow был создан Connection.
 
 <p align="center">
-  <img width="800" height="300" src="https://github.com/Anteii/Lab-2/tree/main/screenshots/airflow-connection.png"/>
+  <img width="800" height="300" src="https://github.com/Anteii/Lab-2/blob/main/screenshots/airflow-connection.png"/>
 </p>
 
 Докер контейнеры для каждого этапа имеют такую же структуру как и контейнер для обучения из прошлого пункта. 
