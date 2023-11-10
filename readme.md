@@ -33,6 +33,11 @@
   <img width="800" height="300" src="https://github.com/Anteii/Lab-2/blob/main/screenshots/train-log.png"/>
 </p>
 
+
+<p align="center">
+  <img width="800" height="300" src="https://github.com/Anteii/Lab-2/blob/main/screenshots/train-dag.png"/>
+</p>
+
 Для того, чтобы построить лог использовал небольшую выборку данных, поскольку обучение проходило на CPU, поэтому такие неплохие результаты.
 Основная сложностью на данном этапе стали:
 
@@ -110,6 +115,10 @@ A short story of a love story about the life of a man who's got stuck in the roo
 ```
 
 Он был сохранен в пдф (```inference_data/reports```).
+
+<p align="center">
+  <img width="800" height="300" src="https://github.com/Anteii/Lab-2/blob/main/screenshots/inference-dag.png"/>
+</p>
 
 Каждому этапу соответсвует докер контейнер.
 Вся кодовая база помещалась в директорию airflow/data (поскольку код маунтится в контейнеры).
