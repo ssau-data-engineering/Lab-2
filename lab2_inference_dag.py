@@ -78,7 +78,7 @@ create_report_task = DockerOperator(
         Mount(source='/data/lab2/inference_data/texts/',        target='/wd/texts/',    type='bind'),
         Mount(source='/data/lab2/inference_data/reports/',      target='/wd/reports/',  type='bind'),
         Mount(source='/data/lab2/model/summarize_text/',        target='/wd/model/',    type='bind'),
-        Mount(source='/data/lab2/summarize_text/wd/scripts//',  target='/wd/scripts/',  type='bind`'),
+        Mount(source='/data/lab2/summarize_text/wd/scripts//',  target='/wd/scripts/',  type='bind'),
         ],
     docker_url="tcp://docker-proxy:2375",
     dag=dag,
@@ -87,7 +87,7 @@ create_report_task = DockerOperator(
 )
 
 
-wait_for_new_file >> extract_audio_task >> extract_texts_task >> create_report_task
+wait_for_new_files >> extract_audio_task >> extract_texts_task >> create_report_task
 
 if __name__ == "__main__":
     dag.test()
