@@ -2,7 +2,7 @@
 
 audio_path=/home/anteii/projects/ssau-data-engineering/Prerequisites/airflow/data/lab2/inference_data/audios/
 text_path=/home/anteii/projects/ssau-data-engineering/Prerequisites/airflow/data/lab2/inference_data/texts/
-model_path=/home/anteii/projects/ssau-data-engineering/Prerequisites/airflow/data/lab2/model/
+model_path=/home/anteii/projects/ssau-data-engineering/Prerequisites/airflow/data/lab2/model/extract_text/
 container_name=ssau-lab2-audio2text-inference
 
 running_image_name=ssau-lab2-audio2text-inference

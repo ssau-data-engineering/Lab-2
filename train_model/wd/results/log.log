@@ -1,0 +1,4 @@
+Thu, 09 Nov 2023 22:03:13 INFO     Detected (5) files
+Thu, 09 Nov 2023 22:03:14 INFO     DataFrame (/data/lab2/train_data/chunk_0.csv) successfully read
+Thu, 09 Nov 2023 22:03:14 INFO     Data successfully splitted into train/dev sets
+Thu, 09 Nov 2023 22:03:15 INFO     Tokenizer successfully splitted into train/dev sets
