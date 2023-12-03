@@ -1,0 +1,5 @@
+ |Iteration 0 |Erorr 534.0169256110769 | accuracy 0.84
+ |Iteration 2 |Erorr 247.19582428935448 | accuracy 0.93
+ |Iteration 4 |Erorr 169.70247808369385 | accuracy 0.97
+ |Iteration 6 |Erorr 130.05865411330993 | accuracy 0.97
+ |Iteration 8 |Erorr 104.84209913724405 | accuracy 0.97
